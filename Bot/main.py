@@ -10,8 +10,10 @@ from queries.database import SessionLocal
 from queries.model import User
 from queries import config
 from sqlalchemy import select
-from keyboard import premium_kb, subscribe_kb
-from aiogram.types import CallbackQuery
+from handlers import info_kb
+from handlers import router as subscribe_router
+from texts.start import get_start_text
+
 
 
 if sys.platform == "win32":
@@ -23,9 +25,8 @@ TOKEN = os.getenv("API_TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+dp.include_router(subscribe_router)
 dp["max_updates_in_flight"] = 1
-
-
 
 @dp.message(CommandStart())
 async def start_handler(message: Message):
@@ -48,27 +49,12 @@ async def start_handler(message: Message):
                     is_premium = message.from_user.is_premium
                 )
                 session.add(user)
+            name = user.first_name if user else message.from_user.first_name
+            await message.answer(
+                get_start_text(name),
+                reply_markup=info_kb
+            )
 
-            if message.from_user.is_premium:
-                await message.answer(
-                    f"Привет {message.from_user.first_name}! У вас Premium!",
-                    reply_markup=premium_kb
-                )
-            else:
-                await message.answer(
-                    f"Привет! {message.from_user.first_name}! У вас стандартная учетная запись",
-                    reply_markup=subscribe_kb
-                )
-                await session.commit()
-
-
-#Отправка подписки
-@dp.callback_query(lambda c: c.data == "get_subscribe")
-async def get_subscribe(callback: CallbackQuery):
-    await callback.message.answer(
-        "https://crysubik.com/pU-TUFm_4F-8U3Ht"
-    )
-    await callback.answer()
 
 async def main():
     logging.basicConfig(level=logging.INFO)
