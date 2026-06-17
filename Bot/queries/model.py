@@ -26,6 +26,7 @@ class Subscribe(Base):
     end_date: Mapped[date] = mapped_column(Date)
     url: Mapped[str] = mapped_column(String(200))
     price: Mapped[int] = mapped_column(Integer)
+    plan: Mapped[str] = mapped_column(String(50))
     id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     users = relationship("User", back_populates="subscribe")

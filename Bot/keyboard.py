@@ -6,6 +6,9 @@ info_kb = InlineKeyboardMarkup(
         [
             InlineKeyboardButton(text="ℹ️ Информация", callback_data="info"),
             InlineKeyboardButton(text="💲Цены", callback_data="price"),
+        ],
+        [
+            InlineKeyboardButton(text="⚙️ Аккаунт", callback_data="account"),
         ]
     ]
 )

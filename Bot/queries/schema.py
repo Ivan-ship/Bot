@@ -18,3 +18,4 @@ class Subscribe:
     url: str
     id: int
     price: int
+    plan: str

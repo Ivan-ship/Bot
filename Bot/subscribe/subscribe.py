@@ -13,7 +13,7 @@ start_date = date.today()
 
 
 #Create subsriction
-async def create_subscription(session, user_id: int, month: int, price: int):
+async def create_subscription(session, user_id: int, month: int, price: int, plan: str):
     stmt = select(Subscribe).where(
         Subscribe.id == user_id
     )
@@ -26,7 +26,8 @@ async def create_subscription(session, user_id: int, month: int, price: int):
             start_date = date.today(),
             end_date = date.today() + relativedelta(months=month),
             url = sub_url,
-            price = price
+            price = price,
+            plan = plan
         )
         session.add(subscription)
     await session.commit()
