@@ -6,7 +6,6 @@ from subscribe.subscribe import create_subscription
 from queries.database import SessionLocal
 from middleware.midldleware import SubscribeMiddleWare, get_subscription
 
-
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
 router.callback_query.middleware(SubscribeMiddleWare())

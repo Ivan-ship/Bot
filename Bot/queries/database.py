@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from queries.config import settings
 from sqlalchemy import text
 import asyncio
+from queries.base import Base
 
 async_engine = create_async_engine(
     url = settings.DATABASE_URL_asyncpg,
@@ -9,6 +10,10 @@ async_engine = create_async_engine(
     pool_size = 5,
     max_overflow = 10
 )
+
+async def create_tables():
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 SessionLocal = async_sessionmaker(
     bind=async_engine,
