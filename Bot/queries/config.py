@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     #Погружаем с .evn
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    #Connect sting for db
     @property
     def DATABASE_URL_asyncpg(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
