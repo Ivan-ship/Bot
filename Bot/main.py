@@ -14,6 +14,7 @@ from handlers import info_kb
 from handlers import router as subscribe_router
 from texts.start import get_start_text
 from queries.database import create_tables
+from shelduler.notify import subscribe_worker
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -25,6 +26,7 @@ TOKEN = os.getenv("API_TOKEN")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 dp.include_router(subscribe_router)
+
 dp["max_updates_in_flight"] = 1
 
 @dp.message(CommandStart())
@@ -58,6 +60,7 @@ async def start_handler(message: Message):
 async def main():
     await create_tables()
     logging.basicConfig(level=logging.INFO)
+    asyncio.create_task(subscribe_worker(bot))
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
