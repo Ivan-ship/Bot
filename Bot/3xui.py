@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 import uuid
 import secrets
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -14,6 +15,8 @@ USERNAME = os.getenv("XUI_USERNAME")
 PASSWORD = os.getenv("XUI_PASSWORD")
 XUI_HOST = os.getenv("XUI_HOST")
 XUI_PORT = os.getenv("XUI_PORT")
+
+expiry_time = int((datetime.now() + timedelta(days=31)).timestamp() * 1000)
 
 async def main():
     jar = aiohttp.CookieJar(unsafe=True)
@@ -87,10 +90,9 @@ async def main():
             }
 
 
-            vless_url = await generate_vless_url(profile)
+            vless_url = await generate_vless_url(profile, inbound)
             print("VLESS URL: ")
             print(vless_url)
-
         
 #Create users in inbounds
 async def create_clients(session, inbound_id, email, headers):
@@ -113,7 +115,7 @@ async def create_clients(session, inbound_id, email, headers):
                         "subId": secrets.token_hex(8),
                         "totalGB": 0,
                         "limitIp": 0,
-                        "expiryTime": 0,
+                        "expiryTime": expiry_time,
                         "tgId": 0
                     },
                 "inboundIds": [inbound_id]
@@ -131,19 +133,29 @@ async def create_clients(session, inbound_id, email, headers):
         print(f"Произошел сбой! {ex}")
     
 #Return vless url
-async def generate_vless_url(profile_data: dict) -> str:
-    remark = profile_data.get('remark', 'AUS')
-    email = profile_data['email']
-    pbk = "Yjh-oB876wBg6dQxz51wRCacTz3tCGJBqAadjseypyg"
-    fp = "chrome"
-    sni = "www.oracle.com"
-    sid = "8f93ac5e007a18"
+async def generate_vless_url(profile_data, inbound):
+    reality = inbound["streamSettings"]["realitySettings"]
 
-    return(
-        f"vless://{profile_data['client_id']}@{XUI_HOST}:{XUI_PORT}"
-        f"?encryption=none&fp={fp}&&pbk={pbk}&security=reality&"
-        f"sid={sid}&sni={sni}&spx=%2FFrWohfbzLqhPWOS&type=tcp#{remark}-{email}"
+    host = XUI_HOST
+    port = inbound["port"]
+
+    pbk = reality["settings"]["publicKey"]
+    sid = reality["shortIds"][0]
+    sni = reality["serverNames"][0]
+    fp = reality["settings"]["fingerprint"]
+    spx = reality["settings"]["spiderX"]
+
+    return (
+        f"vless://{profile_data['client_id']}@{host}:{port}"
+        f"?type=tcp"
+        f"&security=reality"
+        f"&encryption=none"
+        f"&pbk={pbk}"
+        f"&fp={fp}"
+        f"&sni={sni}"
+        f"&sid={sid}"
+        f"&spx={spx}"
+        f"#{profile_data['remark']}-{profile_data['email']}"
     )
-    
     
 asyncio.run(main())
