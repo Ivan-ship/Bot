@@ -18,7 +18,7 @@ XUI_HOST = os.getenv("XUI_HOST")
 XUI_PORT = os.getenv("XUI_PORT")
 
 async def create_user(tg_id: int, month: int):
-    expiry_time = int((datetime.today() + relativedelta(month=month)).timestamp() * 1000)
+    expiry_time = int((datetime.today() + relativedelta(months=month)).timestamp() * 1000)
     jar = aiohttp.CookieJar(unsafe=True)
     async with aiohttp.ClientSession(cookie_jar=jar) as session:
         async with session.get(f"{BASE_URL}/panel/") as response:

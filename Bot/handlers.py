@@ -74,7 +74,8 @@ async def month1(
             )
     await callback.message.answer(
         f"Вы выбрали 1 месяц, ваша подписка: \n"
-        f"Ваша ссылка: {sub.url}"
+        f"<blockquote>{sub.url}</blockquote>",
+        parse_mode="HTML"
         )
     await callback.answer()
 
@@ -106,12 +107,11 @@ async def month3(
 
     await callback.message.answer(
         f"Вы выбрали 3 месяца, ваша подписка: \n"
-        f"Ваша ссылка: {sub.url}"
+        f"<blockquote>{sub.url}</blockquote>",
+        parse_mode="HTML"
         )
     await callback.answer()
 
-    await callback.message.answer("Вы выбрали 3 месяца — 512₱")
-    await callback.answer()
 
 @router.callback_query(F.data == "month6")
 async def month3(
@@ -140,11 +140,9 @@ async def month3(
 
     await callback.message.answer(
         f"Вы выбрали 6 месяцев, ваша подписка: \n"
-        f"Ваша ссылка: {sub.url}"
+        f"<blockquote>{sub.url}</blockquote>",
+        parse_mode="HTML"
         )
-    await callback.answer()
-
-    await callback.message.answer("Вы выбрали 6 месяцев — 1024₱")
     await callback.answer()
 
 
@@ -158,13 +156,11 @@ async def about_user(callback: CallbackQuery):
 
         if sub:
             text += f"📅 Подписка активна до: {sub.end_date}\n"
-            text += f"Ваша ссылка: {sub.url}\n"
+            text += f"Ваша ссылка: \n"
+            text += f"<blockquote>{sub.url}</blockquote>"
             text += f"{sub.plan}"
         else:
             text += "❌ У вас нет активной подписки"
 
-    await callback.message.answer(text)
+    await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()
- 
-    
-    await callback.message.answer()
