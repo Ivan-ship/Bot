@@ -157,6 +157,6 @@ async def generate_vless_url(profile_data, inbound):
         f"&sni={sni}"
         f"&sid={sid}"
         f"&spx={spx}"
-        f"#{profile_data['remark']}-{profile_data['email']}"
+        f"#{profile_data['remark']}"
     )
     
