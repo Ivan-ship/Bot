@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 import os
 import uuid
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 load_dotenv()
 
@@ -16,9 +17,8 @@ PASSWORD = os.getenv("XUI_PASSWORD")
 XUI_HOST = os.getenv("XUI_HOST")
 XUI_PORT = os.getenv("XUI_PORT")
 
-expiry_time = int((datetime.now() + timedelta(days=31)).timestamp() * 1000)
-
-async def main():
+async def create_user(tg_id: int, month: int):
+    expiry_time = int((datetime.today() + relativedelta(month=month)).timestamp() * 1000)
     jar = aiohttp.CookieJar(unsafe=True)
     async with aiohttp.ClientSession(cookie_jar=jar) as session:
         async with session.get(f"{BASE_URL}/panel/") as response:
@@ -56,46 +56,44 @@ async def main():
                 print("Inbound: ", inbound["remark"])
                 settings = inbound["settings"]
 
-                for client in settings["clients"]:
+                for client in inbound["settings"]["clients"]:
                     print(client["email"], client["id"])
         
         #Create test user
-        async with session.get(
-            f"{BASE_URL}/panel/api/inbounds/list"
-            ) as response:
-            data = await response.json()
+        headers = {
+            "X-CSRF-Token": csrf,
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+            "Origin": BASE_URL,
+            "Referer": f"{BASE_URL}/panel/"
+        }
 
-            headers = {
-                "X-CSRF-Token": csrf,
-                "X-Requested-With": "XMLHttpRequest",
-                "Content-Type": "application/json",
-                "Origin": BASE_URL,
-                "Referer": f"{BASE_URL}/panel/"
-            }
-            inbound = data["obj"][0]
-            inbound_id = inbound["id"]
-            print("Создание пользователя")
-            client_id = await create_clients(
-                session=session, 
-                inbound_id=inbound_id, 
-                email="email3@gmail.com",
-                headers=headers
-                )
-            print("UUID: ", client_id)
+        inbound = data["obj"][0]
+        inbound_id = inbound["id"]
+        print("Создание пользователя")
 
-            profile = {
-                "client_id": client_id,
-                "email": "email@gmail.com",
-                "remark": inbound["remark"]
-            }
+        client_id = await create_clients(
+            session=session, 
+            inbound_id=inbound_id, 
+            headers=headers,
+            tg_id = tg_id,
+            expiry_time = expiry_time
+            )
+        print("UUID: ", client_id)
+
+        profile = {
+            "client_id": client_id,
+            "email": str(tg_id),
+            "remark": inbound["remark"]
+        }
 
 
-            vless_url = await generate_vless_url(profile, inbound)
-            print("VLESS URL: ")
-            print(vless_url)
+        vless_url = await generate_vless_url(profile, inbound)
+        return vless_url
+
         
 #Create users in inbounds
-async def create_clients(session, inbound_id, email, headers):
+async def create_clients(session, inbound_id, tg_id, headers,  expiry_time):
     client_id = str(uuid.uuid4())
 
     try:
@@ -103,7 +101,7 @@ async def create_clients(session, inbound_id, email, headers):
                 "client": 
                     {
                         "id": client_id,
-                        "email": email,
+                        "email": str(tg_id),
                         "auth": secrets.token_urlsafe(12),
                         "comment": "",
                         "enable": True,
@@ -116,7 +114,7 @@ async def create_clients(session, inbound_id, email, headers):
                         "totalGB": 0,
                         "limitIp": 0,
                         "expiryTime": expiry_time,
-                        "tgId": 0
+                        "tgId": tg_id
                     },
                 "inboundIds": [inbound_id]
         }
@@ -128,6 +126,10 @@ async def create_clients(session, inbound_id, email, headers):
         ) as response:
             text = await response.text()
             print("CREATE STATUS:", response.status, text)
+
+            if response.status != 200:
+                raise Exception(f"ОШИБКА API! {text}")
+        
         return client_id
     except Exception as ex:
         print(f"Произошел сбой! {ex}")
@@ -158,4 +160,3 @@ async def generate_vless_url(profile_data, inbound):
         f"#{profile_data['remark']}-{profile_data['email']}"
     )
     
-asyncio.run(main())

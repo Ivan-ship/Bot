@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 import os
 from sqlalchemy import select
 from queries.model import User, Subscribe
+from xui import create_user
 
 load_dotenv()
 
-sub_url = os.getenv("SUBSCRIBE_URL")
 
 start_date = date.today()
 
@@ -21,11 +21,14 @@ async def create_subscription(session, user_id: int, month: int, price: int, pla
     subscription = result.scalar_one_or_none()
 
     if subscription is None:
+
+        vless_url = await create_user(user_id, month)
+
         subscription = Subscribe(
             id = user_id,
             start_date = date.today(),
             end_date = date.today() + relativedelta(months=month),
-            url = sub_url,
+            url = vless_url,
             price = price,
             plan = plan
         )

@@ -5,6 +5,7 @@ from texts.start import get_start_text
 from subscribe.subscribe import create_subscription
 from queries.database import SessionLocal
 from middleware.midldleware import SubscribeMiddleWare, get_subscription
+from xui import create_user
 
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
