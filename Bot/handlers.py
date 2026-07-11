@@ -1,11 +1,12 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
-from keyboard import  subscribe_kb, info_kb, devices_kb
+from keyboard import  subscribe_kb, info_kb, devices_kb, admin_kb
 from texts.start import get_start_text
 from subscribe.subscribe import create_subscription
 from queries.database import SessionLocal
 from middleware.midldleware import SubscribeMiddleWare, get_subscription
 from xui import create_user
+from aiogram.filters import Command
 
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
@@ -164,3 +165,16 @@ async def about_user(callback: CallbackQuery):
 
     await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()
+
+
+#Admin panel
+@router.message(Command("admin"))
+async def admin(message: Message, user):
+    if not user.is_admin:
+        await message.answer("⛔ У вас нет доступа.")
+        return
+    else:
+        await message.answer(
+            "Добро пожаловать в Admin панель",
+            reply_markup=admin_kb
+        )

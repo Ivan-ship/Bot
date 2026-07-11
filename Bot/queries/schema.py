@@ -9,6 +9,7 @@ class User:
     username: str
     language_code: str | None = None
     is_premium: bool | None = None
+    is_admin: bool | None = None
 
 
 class Subscribe:

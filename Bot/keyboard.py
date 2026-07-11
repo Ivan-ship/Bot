@@ -46,3 +46,9 @@ subscribe_kb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="⬅️ Назад", callback_data="back")],
     ]
 )
+
+admin_kb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="Количество пользователей", callback_data="users_numbers")]
+    ]
+)

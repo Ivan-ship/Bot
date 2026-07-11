@@ -15,6 +15,7 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(100))
     language_code: Mapped[str| None] = mapped_column(String(100), nullable=True)
     is_premium: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_admin: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
 
     subscribe = relationship("Subscribe", back_populates="users", cascade="all, delete-orphan")
 
