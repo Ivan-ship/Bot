@@ -49,6 +49,6 @@ subscribe_kb = InlineKeyboardMarkup(
 
 admin_kb = InlineKeyboardMarkup(
     inline_keyboard=[
-        [InlineKeyboardButton(text="Количество пользователей", callback_data="users_numbers")]
+        [InlineKeyboardButton(text="📊 Статистика", callback_data="statistics")]
     ]
 )

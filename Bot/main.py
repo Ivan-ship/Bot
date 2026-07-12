@@ -15,6 +15,7 @@ from handlers import router as subscribe_router
 from texts.start import get_start_text
 from queries.database import create_tables
 from shelduler.notify import subscribe_worker
+from datetime import datetime
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -46,7 +47,8 @@ async def start_handler(message: Message):
                     last_name = message.from_user.last_name,
                     username = message.from_user.username,
                     language_code = message.from_user.language_code,
-                    is_premium = message.from_user.is_premium
+                    is_premium = message.from_user.is_premium,
+                    created_at = datetime.now()
                 )
                 session.add(user)
                 await session.commit()

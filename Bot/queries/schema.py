@@ -10,6 +10,7 @@ class User:
     language_code: str | None = None
     is_premium: bool | None = None
     is_admin: bool | None = None
+    created_at: date
 
 
 class Subscribe:

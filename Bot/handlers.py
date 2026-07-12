@@ -7,6 +7,7 @@ from queries.database import SessionLocal
 from middleware.midldleware import SubscribeMiddleWare, get_subscription
 from xui import create_user
 from aiogram.filters import Command
+from repositories.admin_repositories import AdminRepositories
 
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
@@ -167,6 +168,7 @@ async def about_user(callback: CallbackQuery):
     await callback.answer()
 
 
+
 #Admin panel
 @router.message(Command("admin"))
 async def admin(message: Message, user):
@@ -178,3 +180,18 @@ async def admin(message: Message, user):
             "Добро пожаловать в Admin панель",
             reply_markup=admin_kb
         )
+
+@router.callback_query(F.data == "statistics")
+async def statistics(callback: CallbackQuery):
+    async with SessionLocal() as session:
+        repo = AdminRepositories(session)
+        stats = await repo.get_statistics()
+    
+    await callback.message.answer(
+        f"👥 Всего пользователей: {stats["user_count"]}\n"
+        f"🆕 Новых сегодня: {stats["today_user_count"]}\n"
+        f"🔑 Всего ключей: {stats["vless_url_count"]}\n"
+        f"🟢 Активных ключей: {stats["active_vless_url"]}\n"
+        f"🔴 Просроченных: {stats["disacrive_vless_url"]}" 
+    )
+    await callback.answer()
