@@ -7,7 +7,8 @@ from queries.database import SessionLocal
 from middleware.midldleware import SubscribeMiddleWare, get_subscription
 from xui import create_user
 from aiogram.filters import Command
-from repositories.admin_repositories import AdminRepositories
+from repositories.stats_repository import AdminRepositories
+from repositories.user_repository import UserRepo
 
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
@@ -194,4 +195,11 @@ async def statistics(callback: CallbackQuery):
         f"🟢 Активных ключей: {stats["active_vless_url"]}\n"
         f"🔴 Просроченных: {stats["disacrive_vless_url"]}" 
     )
+    await callback.answer()
+
+
+#About user
+@router.callback_query(F.data == "users")
+async def about_user(callback: CallbackQuery):
+    await callback.message.answer("Введите telegram id пользователя!")
     await callback.answer()
