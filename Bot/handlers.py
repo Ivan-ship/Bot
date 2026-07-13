@@ -9,6 +9,7 @@ from xui import create_user
 from aiogram.filters import Command
 from repositories.stats_repository import AdminRepositories
 from repositories.user_repository import UserRepo
+from repositories.keys_repository import KeyRepository
 from states.admin_state import AdminState
 from aiogram.fsm.context import FSMContext
 
@@ -236,3 +237,27 @@ username: @{user.username}
         reply_markup=about_user_kb
     )
     await state.clear()
+
+
+#Sub info
+@router.callback_query(F.data == "keys")
+async def key(callback: CallbackQuery):
+    async with SessionLocal() as session:
+        repo = KeyRepository(session)
+        sub = await repo.get_user_key(callback.from_user.id)
+
+        if sub is None:
+            await callback.message.answer("❌ У данного пользователя нет активной подписки.")
+            await callback.answer()
+            return
+        
+    await callback.message.answer(
+        f"""
+📅 Дата покупки: {sub.start_date}
+📅 Дата окончания: {sub.end_date}
+🔑 Ключ:
+<blockquote>{sub.url}</blockquote>
+        """,
+        parse_mode="HTML"
+    )
+    await callback.answer()
