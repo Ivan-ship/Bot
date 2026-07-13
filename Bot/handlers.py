@@ -1,6 +1,6 @@
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
-from keyboard import  subscribe_kb, info_kb, devices_kb, admin_kb
+from keyboard import  subscribe_kb, info_kb, devices_kb, admin_kb, about_user_kb
 from texts.start import get_start_text
 from subscribe.subscribe import create_subscription
 from queries.database import SessionLocal
@@ -9,6 +9,8 @@ from xui import create_user
 from aiogram.filters import Command
 from repositories.stats_repository import AdminRepositories
 from repositories.user_repository import UserRepo
+from states.admin_state import AdminState
+from aiogram.fsm.context import FSMContext
 
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
@@ -200,6 +202,37 @@ async def statistics(callback: CallbackQuery):
 
 #About user
 @router.callback_query(F.data == "users")
-async def about_user(callback: CallbackQuery):
+async def about_user(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(AdminState.waiting_tg_id)
     await callback.message.answer("Введите telegram id пользователя!")
     await callback.answer()
+
+
+@router.message(AdminState.waiting_tg_id)
+async def get_user_by_tg_id(message: Message, state: FSMContext):
+    try:
+        telegram_id = int(message.text)
+    except ValueError:
+        await message.answer("❌ ID должен быть числовым")
+        return
+
+    async with SessionLocal() as session:
+        repo = UserRepo(session)
+        user = await repo.get_by_telegram_id(telegram_id)
+    
+    if user is None:
+        await message.answer("Данного пользователя не существует")
+        await state.clear()
+        return
+    
+    await message.answer(
+        f"""
+👤 Пользователь
+telegramID: {user.id}
+first_name: {user.first_name}
+last_name: {user.last_name}
+username: @{user.username}
+        """,
+        reply_markup=about_user_kb
+    )
+    await state.clear()

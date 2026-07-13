@@ -54,3 +54,12 @@ admin_kb = InlineKeyboardMarkup(
         ],
     ]
 )
+
+about_user_kb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text="🔑 Ключи", callback_data="keys"),
+         InlineKeyboardButton(text="💎 Продлить подписку", callback_data="renew_sub")
+        ],
+        [InlineKeyboardButton(text="❌ Удалить ключ", callback_data="delete_key")],
+    ]
+)
