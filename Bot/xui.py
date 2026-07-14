@@ -1,4 +1,3 @@
-import asyncio
 import aiohttp
 from bs4 import BeautifulSoup
 import json
@@ -134,6 +133,8 @@ async def create_clients(session, inbound_id, tg_id, headers,  expiry_time):
     except Exception as ex:
         print(f"Произошел сбой! {ex}")
     
+
+
 #Return vless url
 async def generate_vless_url(profile_data, inbound):
     reality = inbound["streamSettings"]["realitySettings"]

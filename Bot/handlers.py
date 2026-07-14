@@ -5,7 +5,7 @@ from texts.start import get_start_text
 from subscribe.subscribe import create_subscription
 from queries.database import SessionLocal
 from middleware.midldleware import SubscribeMiddleWare, get_subscription
-from xui import create_user
+from middleware.db import DbMiddleware
 from aiogram.filters import Command
 from repositories.stats_repository import AdminRepositories
 from repositories.user_repository import UserRepo
@@ -15,7 +15,9 @@ from aiogram.fsm.context import FSMContext
 
 router = Router()
 router.message.middleware(SubscribeMiddleWare())
+router.message.middleware(DbMiddleware())
 router.callback_query.middleware(SubscribeMiddleWare())
+router.callback_query.middleware(DbMiddleware())
 
 @router.message(F.text == "ℹ️ Информация")
 async def info(message: Message):
@@ -58,26 +60,25 @@ async def back_main(callback: CallbackQuery):
 async def month1(
     callback: CallbackQuery,
     has_subscription: bool,
-    subscription
+    subscription,
+    session
     ):
     
-    async with SessionLocal() as session:
+    if has_subscription:
+        await callback.message.answer(
+            f"У вас уже активная подписка до: {subscription.end_date}"
+        )
+        await callback.answer()
+        return
 
-        if has_subscription:
-            await callback.message.answer(
-                f"У вас уже активная подписка до: {subscription.end_date}"
-            )
-            await callback.answer()
-            return
 
-        async with SessionLocal() as session:
-            sub = await create_subscription(
-                session=session,
-                user_id=callback.from_user.id,
-                month=1,
-                price = 200,
-                plan = "Тариф: 1 месяц"
-            )
+    sub = await create_subscription(
+        session=session,
+        user_id=callback.from_user.id,
+        month=1,
+        price = 200,
+        plan = "Тариф: 1 месяц"
+        )
     await callback.message.answer(
         f"Вы выбрали 1 месяц, ваша подписка: \n"
         f"<blockquote>{sub.url}</blockquote>",
@@ -90,26 +91,25 @@ async def month1(
 async def month3(
     callback: CallbackQuery,
     has_subscription: bool,
-    subscription
+    subscription,
+    session
     ):
 
-    async with SessionLocal() as session:
+    if has_subscription:
+        await callback.message.answer(
+            f"У вас уже активная подписка до: {subscription.end_date}"
+        )
+        await callback.answer()
+        return
 
-        if has_subscription:
-            await callback.message.answer(
-                f"У вас уже активная подписка до: {subscription.end_date}"
-            )
-            await callback.answer()
-            return
 
-        async with SessionLocal() as session:
-            sub = await create_subscription(
-                session=session,
-                user_id=callback.from_user.id,
-                month=3,
-                price = 512,
-                plan = "Тариф: 3 месяца"
-            )
+    sub = await create_subscription(
+        session=session,
+        user_id=callback.from_user.id,
+        month=3,
+        price = 512,
+        plan = "Тариф: 3 месяца"
+        )
 
     await callback.message.answer(
         f"Вы выбрали 3 месяца, ваша подписка: \n"
@@ -123,26 +123,24 @@ async def month3(
 async def month3(
     callback: CallbackQuery,
     has_subscription: bool,
-    subscription
+    subscription,
+    session
     ):
-    
-    async with SessionLocal() as session:
 
-        if has_subscription:
-            await callback.message.answer(
-                f"У вас уже активная подписка до: {subscription.end_date}"
-            )
-            await callback.answer()
-            return
+    if has_subscription:
+        await callback.message.answer(
+            f"У вас уже активная подписка до: {subscription.end_date}"
+        )
+        await callback.answer()
+        return
 
-        async with SessionLocal() as session:
-            sub = await create_subscription(
-                session=session,
-                user_id=callback.from_user.id,
-                month=6,
-                price = 1024,
-                plan = "Тариф: 6 месяцев"
-            )
+    sub = await create_subscription(
+        session=session,
+        user_id=callback.from_user.id,
+        month=6,
+        price = 1024,
+        plan = "Тариф: 6 месяцев"
+        )
 
     await callback.message.answer(
         f"Вы выбрали 6 месяцев, ваша подписка: \n"
@@ -154,19 +152,17 @@ async def month3(
 
 #account info
 @router.callback_query(F.data == "account")
-async def about_user(callback: CallbackQuery):
-    async with SessionLocal() as session:
-        sub = await get_subscription(session, callback.from_user.id)
+async def about_user(callback: CallbackQuery, session):
+    sub = await get_subscription(session, callback.from_user.id)
+    text = f"👤 Аккаунт: {callback.from_user.id}\n"
 
-        text = f"👤 Аккаунт: {callback.from_user.id}\n"
-
-        if sub:
-            text += f"📅 Подписка активна до: {sub.end_date}\n"
-            text += f"Ваша ссылка: \n"
-            text += f"<blockquote>{sub.url}</blockquote>"
-            text += f"{sub.plan}"
-        else:
-            text += "❌ У вас нет активной подписки"
+    if sub:
+        text += f"📅 Подписка активна до: {sub.end_date}\n"
+        text += f"Ваша ссылка: \n"
+        text += f"<blockquote>{sub.url}</blockquote>"
+        text += f"{sub.plan}"
+    else:
+        text += "❌ У вас нет активной подписки"
 
     await callback.message.answer(text, parse_mode="HTML")
     await callback.answer()
@@ -186,10 +182,9 @@ async def admin(message: Message, user):
         )
 
 @router.callback_query(F.data == "statistics")
-async def statistics(callback: CallbackQuery):
-    async with SessionLocal() as session:
-        repo = AdminRepositories(session)
-        stats = await repo.get_statistics()
+async def statistics(callback: CallbackQuery, session):
+    repo = AdminRepositories(session)
+    stats = await repo.get_statistics()
     
     await callback.message.answer(
         f"👥 Всего пользователей: {stats["user_count"]}\n"
@@ -210,16 +205,15 @@ async def about_user(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminState.waiting_tg_id)
-async def get_user_by_tg_id(message: Message, state: FSMContext):
+async def get_user_by_tg_id(message: Message, state: FSMContext, session):
     try:
         telegram_id = int(message.text)
     except ValueError:
         await message.answer("❌ ID должен быть числовым")
         return
 
-    async with SessionLocal() as session:
-        repo = UserRepo(session)
-        user = await repo.get_by_telegram_id(telegram_id)
+    repo = UserRepo(session)
+    user = await repo.get_by_telegram_id(telegram_id)
     
     if user is None:
         await message.answer("Данного пользователя не существует")
@@ -241,15 +235,15 @@ username: @{user.username}
 
 #Sub info
 @router.callback_query(F.data == "keys")
-async def key(callback: CallbackQuery):
-    async with SessionLocal() as session:
-        repo = KeyRepository(session)
-        sub = await repo.get_user_key(callback.from_user.id)
+async def key(callback: CallbackQuery, session):
 
-        if sub is None:
-            await callback.message.answer("❌ У данного пользователя нет активной подписки.")
-            await callback.answer()
-            return
+    repo = KeyRepository(session)
+    sub = await repo.get_user_key(callback.from_user.id)
+
+    if sub is None:
+        await callback.message.answer("❌ У данного пользователя нет активной подписки.")
+        await callback.answer()
+        return
         
     await callback.message.answer(
         f"""
@@ -261,3 +255,4 @@ async def key(callback: CallbackQuery):
         parse_mode="HTML"
     )
     await callback.answer()
+
