@@ -1,4 +1,4 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from middleware.registration import UserRegister
@@ -10,7 +10,9 @@ from texts.start import get_start_text
 router = Router()
 
 router.message.middleware(DbMiddleware())
+router.callback_query.middleware(DbMiddleware())
 router.message.middleware(UserRegister())
+router.callback_query(UserRegister)
 
 router.callback_query.middleware(DbMiddleware())
 router.callback_query.middleware(UserRegister())
