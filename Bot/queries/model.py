@@ -26,7 +26,7 @@ class Subscribe(Base):
     sub_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     start_date: Mapped[date] = mapped_column(Date)
     end_date: Mapped[date] = mapped_column(Date)
-    url: Mapped[str] = mapped_column(String(200))
+    url: Mapped[str] = mapped_column(String(1000))
     price: Mapped[int] = mapped_column(Integer)
     plan: Mapped[str] = mapped_column(String(50))
     id: Mapped[int] = mapped_column(ForeignKey("users.id"))

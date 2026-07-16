@@ -1,0 +1,32 @@
+version: '3.9'
+services:
+  bot:
+    build: .
+    container_name: sparta_vpn
+    restart: unless-stopped
+
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+  
+  postgres:
+    image: postgres:16
+
+    container_name: postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwpsql_18
+      POSTGRES_DB: Fistnes
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
