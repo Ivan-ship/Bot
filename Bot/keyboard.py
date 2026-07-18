@@ -1,5 +1,7 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from queries.model import User
+
+user = User()
 
 info_kb = InlineKeyboardMarkup(
     inline_keyboard=[

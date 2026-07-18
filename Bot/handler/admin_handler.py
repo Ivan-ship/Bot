@@ -11,12 +11,13 @@ from middleware.db import DbMiddleware
 from middleware.registration import UserRegister
 
 
-
 router = Router()
 router.message.middleware(DbMiddleware())
 router.message.middleware(UserRegister())
 router.callback_query.middleware(DbMiddleware())
 router.callback_query.middleware(UserRegister())
+
+
 
 #Admin panel
 @router.message(Command("admin"))
@@ -69,6 +70,8 @@ async def get_user_by_tg_id(message: Message, state: FSMContext, session):
         await state.clear()
         return
     
+    await state.update_data(user_id = user.id)
+    
     await message.answer(
         f"""
 👤 Пользователь
@@ -79,21 +82,24 @@ username: @{user.username}
         """,
         reply_markup=about_user_kb
     )
-    await state.clear()
 
 
 #Sub info
 @router.callback_query(F.data == "keys")
-async def key(callback: CallbackQuery, session):
+async def key(callback: CallbackQuery, state: FSMContext, session):
 
+    data = await state.get_data()
+    user_id = data.get("user_id")
     repo = KeyRepository(session)
-    sub = await repo.get_user_key(callback.from_user.id)
+    sub = await repo.get_user_key(user_id)
+
 
     if sub is None:
         await callback.message.answer("❌ У данного пользователя нет активной подписки.")
         await callback.answer()
         return
-        
+    
+
     await callback.message.answer(
         f"""
 📅 Дата покупки: {sub.start_date}
@@ -103,4 +109,5 @@ async def key(callback: CallbackQuery, session):
         """,
         parse_mode="HTML"
     )
+    await state.clear()
     await callback.answer()
