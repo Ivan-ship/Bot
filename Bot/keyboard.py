@@ -54,6 +54,7 @@ admin_kb = InlineKeyboardMarkup(
         [InlineKeyboardButton(text="📊 Статистика", callback_data="statistics"),
          InlineKeyboardButton(text="👤 Пользователи", callback_data="users")
         ],
+        [InlineKeyboardButton(text="📢 Рассылка", callback_data="mailing")]
     ]
 )
 

@@ -1,3 +1,4 @@
+from aiogram import Bot
 from aiogram import F, Router
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
@@ -7,6 +8,7 @@ from states.admin_state import AdminState
 from repositories.stats_repository import AdminRepositories
 from repositories.user_repository import UserRepo
 from repositories.keys_repository import KeyRepository
+from repositories.get_user import GetAllUsers
 from middleware.db import DbMiddleware
 from middleware.registration import UserRegister
 
@@ -111,3 +113,37 @@ async def key(callback: CallbackQuery, state: FSMContext, session):
     )
     await state.clear()
     await callback.answer()
+
+
+#Mail
+@router.callback_query(F.data == "mailing")
+async def mailing(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(AdminState.waiting_text)
+    await callback.message.answer("Введите свое обращение к пользователям!")
+    await callback.answer()
+
+
+@router.message(AdminState.waiting_text)
+async def send_mail(message: Message, state: FSMContext, session, bot: Bot):
+    repo = GetAllUsers(session)
+    users = await repo.get_all_user()
+
+    success =0
+    faild = 0
+
+    for user in users:
+        try:
+            await bot.send_message(
+                chat_id=user.id,
+                text = message.text
+            )
+            success += 1
+        except Exception:
+            faild += 1
+    await message.answer(
+        f"Обращение отправлено\n"
+        f"Успешно отправлено: {success}\n"
+        f"Не удалось отправить: {faild}\n"
+    )
+
+    await state.clear()
