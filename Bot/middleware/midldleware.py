@@ -2,6 +2,7 @@ from aiogram import BaseMiddleware
 from sqlalchemy import select
 from queries.model import Subscribe, User
 from queries.database import SessionLocal
+from datetime import date
 
 async def get_subscription(session, user_id: int):
     stmt = select(Subscribe).where(Subscribe.id == user_id)
@@ -18,13 +19,20 @@ class SubscribeMiddleWare(BaseMiddleware):
         async with SessionLocal() as session:
             user_id = event.from_user.id
 
-            user_stmp = select(User).where(User.id == user_id)
-            user = (await session.execute(user_stmp)).scalar_one_or_none()
-            sub_stmp = select(Subscribe).where(Subscribe.id == user_id)
-            sub = (await session.execute(sub_stmp)).scalar_one_or_none()
-        
+            user = (
+                await session.execute(select(User).where(User.id == user_id))
+            ).scalar_one_or_none()
+
+            sub = (
+                await session.execute(select(Subscribe).where(Subscribe.id == user_id))
+            ).scalar_one_or_none()
+
+            has_subscription = (
+                user is not None and sub is not None and sub.is_active and  sub.end_date >= date.today()
+            )
+
         data["user"] = user
         data["subscription"] = sub
-        data["has_subscription"] = sub is not None and user is not None
+        data["has_subscription"] = has_subscription
 
         return await handler(event, data)

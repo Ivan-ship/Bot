@@ -29,6 +29,7 @@ class Subscribe(Base):
     url: Mapped[str] = mapped_column(String(1000))
     price: Mapped[int] = mapped_column(Integer)
     plan: Mapped[str] = mapped_column(String(50))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     users = relationship("User", back_populates="subscribe")

@@ -51,11 +51,16 @@ async def about_user(callback: CallbackQuery, session):
     sub = await get_subscription(session, callback.from_user.id)
     text = f"👤 Аккаунт: {callback.from_user.id}\n"
 
-    if sub:
+    if sub and sub.is_active:
         text += f"📅 Подписка активна до: {sub.end_date}\n"
         text += f"Ваша ссылка: \n"
         text += f"<blockquote>{sub.url}</blockquote>"
         text += f"{sub.plan}"
+    elif sub:
+        text += (
+            "🔴 Статус: Подписка закончилась\n"
+            f"📅 Дата окончания: {sub.end_date}"
+        )
     else:
         text += "❌ У вас нет активной подписки"
 
