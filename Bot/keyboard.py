@@ -24,7 +24,7 @@ devices_kb = InlineKeyboardMarkup(
                 ),
             InlineKeyboardButton(
                 text="IOS",
-                url="https://apps.apple.com/app/id6746188973"
+                url="https://apps.apple.com/us/app/happ-proxy-utility/id6504287215?l=ru"
                 ),   
         ],
         [
