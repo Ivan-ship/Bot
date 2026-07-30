@@ -11,7 +11,6 @@ class CreateUser:
         stmt = select(User).where(User.id == tg_user.id)
         res = await self.session.execute(stmt)
         user = res.scalar_one_or_none()
-
         if user is None:
             user = User(
                 id = tg_user.id,

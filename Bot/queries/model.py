@@ -12,7 +12,7 @@ class User(Base):
     is_bot: Mapped[bool] = mapped_column(Boolean)
     first_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
     last_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    username: Mapped[str] = mapped_column(String(100))
+    username: Mapped[str | None] = mapped_column(String(100))
     language_code: Mapped[str| None] = mapped_column(String(100), nullable=True)
     is_premium: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     is_admin: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
