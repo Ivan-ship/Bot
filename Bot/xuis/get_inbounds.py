@@ -7,5 +7,5 @@ load_dotenv()
 BASE_URL = os.getenv("URL")
 
 async def get_inbounds(session):
-    async with session.get(f"{BASE_URL}/panel/api/inbounds/list") as resp:
+    async with session.get(f"{BASE_URL}/panel/api/inbounds/list/slim") as resp:
         return await resp.json()
