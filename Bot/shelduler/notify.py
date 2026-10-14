@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import date
 from sqlalchemy import select, delete
 from aiogram import Bot
@@ -40,5 +41,12 @@ async def check_subscription(bot: Bot):
 
 async def subscribe_worker(bot: Bot):
     while True:
-        await check_subscription(bot)
+        try:
+            logging.info("Запуск задачи")
+
+            await check_subscription(bot)
+            logging.info("Проверка подписок")
+        except Exception:
+            logging.exception("Ошибка при проверке!")
+        
         await asyncio.sleep(60 * 60)

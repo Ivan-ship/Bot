@@ -104,16 +104,15 @@ async def key(callback: CallbackQuery, state: FSMContext, session):
 
     await callback.message.answer(
         f"""
-📅 Дата покупки: {sub.start_date}
-📅 Дата окончания: {sub.end_date}
-🔑 Ключ:
-<blockquote>{sub.url}</blockquote>
+            📅 Дата покупки: {sub.start_date}
+            📅 Дата окончания: {sub.end_date}
+            🔑 Ключ:
+            <blockquote>{sub.url}</blockquote>
         """,
         parse_mode="HTML"
     )
     await state.clear()
     await callback.answer()
-
 
 #Mail
 @router.callback_query(F.data == "mailing")
