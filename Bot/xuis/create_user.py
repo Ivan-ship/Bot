@@ -18,26 +18,31 @@ async def create_user(tg_id: int, month: int):
     try:
         data = await get_inbounds(session)
 
-        inbound = data["obj"][0]
+        inbounds = data["obj"]
+
+        indounds_ids = [
+            inbound["id"]
+            for inbound in inbounds
+        ]
 
         expiry = int(
             (datetime.today() + relativedelta(months=month)).timestamp() * 1000
         )
 
-        client_id = await create_clients(
+        client_data = await create_clients(
             session=session,
-            inbound_id=inbound["id"],
+            inbound_ids=indounds_ids,
             headers=headers,
             tg_id=tg_id,
             expiry_time=expiry
         )
 
         profile = {
-            "client_id": client_id,
-            "remark": inbound["remark"]
+            "client_id": client_data["client_id"],
+            "sub_id": client_data["sub_id"]
         }
 
-        return await generate_vless_url(profile, inbound)
+        return await generate_vless_url(profile)
 
     finally:
         await session.close()

@@ -10,13 +10,14 @@ BASE_URL = os.getenv("URL")
 
 async def create_clients(
         session,
-        inbound_id,
+        inbound_ids,
         tg_id,
         headers,
         expiry_time
 ):
 
     client_id = str(uuid.uuid4())
+    sub_id = secrets.token_hex(8)
 
     payload = {
         "client": {
@@ -30,15 +31,13 @@ async def create_clients(
             "password": secrets.token_urlsafe(12),
             "reset": 0,
             "security": "auto",
-            "subId": secrets.token_hex(8),
+            "subId": sub_id,
             "totalGB": 0,
             "limitIp": 0,
             "expiryTime": expiry_time,
             "tgId": tg_id
         },
-        "inboundIds": [
-            inbound_id
-        ]
+        "inboundIds": inbound_ids
     }
 
     async with session.post(
@@ -58,4 +57,7 @@ async def create_clients(
         if response.status != 200:
             raise Exception(text)
 
-    return client_id
+    return {
+        "client_id": client_id,
+        "sub_id": sub_id
+    }

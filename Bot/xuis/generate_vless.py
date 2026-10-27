@@ -5,28 +5,16 @@ load_dotenv()
 
 XUI_HOST = os.getenv("XUI_HOST")
 XUI_PORT = os.getenv("XUI_PORT")
+LISTEN_PORT = os.getenv("LISTEN_PORT")
+URI_APTH = os.getenv("URI_APTH")
 
-async def generate_vless_url(profile_data, inbound):
-    reality = inbound["streamSettings"]["realitySettings"]
-
+async def generate_vless_url(profile_data):
+    sub_id = profile_data["sub_id"]
+    
     host = XUI_HOST
-    port = inbound["port"]
-
-    pbk = reality["settings"]["publicKey"]
-    sid = reality["shortIds"][0]
-    sni = reality["serverNames"][0]
-    fp = reality["settings"]["fingerprint"]
-    spx = reality["settings"]["spiderX"]
+    listen_port = LISTEN_PORT
+    uri = URI_APTH
 
     return (
-        f"vless://{profile_data['client_id']}@{host}:{port}"
-        f"?type=tcp"
-        f"&security=reality"
-        f"&encryption=none"
-        f"&pbk={pbk}"
-        f"&fp={fp}"
-        f"&sni={sni}"
-        f"&sid={sid}"
-        f"&spx={spx}"
-        f"#{profile_data['remark']}"
+        f"https://{host}:{listen_port}/{uri}/{sub_id}"
     )
