@@ -36,7 +36,9 @@ async def month1(
         )
     await callback.message.answer(
         f"Вы выбрали 1 месяц, ваша подписка: \n"
-        f"<blockquote>{sub.url}</blockquote>",
+        "🔗 Ваша ссылка подключения:\n"
+        "Нажмите, чтобы скопировать 👇\n\n"
+        f"<blockquote><code>{sub.url}</code></blockquote>",
         parse_mode="HTML"
         )
     await callback.answer()

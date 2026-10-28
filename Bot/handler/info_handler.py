@@ -53,8 +53,8 @@ async def about_user(callback: CallbackQuery, session):
 
     if sub and sub.is_active:
         text += f"📅 Подписка активна до: {sub.end_date}\n"
-        text += f"Ваша ссылка: \n"
-        text += f"<blockquote>{sub.url}</blockquote>"
+        text += f"🔗 Ваша ссылка подключения: \n"
+        text += f"<blockquote><code>{sub.url}</code></blockquote>"
         text += f"{sub.plan}"
     elif sub:
         text += (
